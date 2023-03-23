@@ -1,24 +1,34 @@
 package com.example.alarmdemo
 
-import android.app.AlarmManager
-import android.app.PendingIntent
-import android.content.Context
 import android.content.Intent
-import android.provider.Settings
+import android.net.Uri
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Environment
+import android.provider.Settings
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import java.time.LocalDateTime
 
+
 class MainActivity : AppCompatActivity() {
+    val ACTION_MANAGE_OVERLAY_PERMISSION_REQUEST_CODE =111
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (!Settings.canDrawOverlays(this)) {
+                val intent = Intent(
+                    Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    Uri.parse("package:" + this.packageName)
+                )
+                startActivityForResult(intent, ACTION_MANAGE_OVERLAY_PERMISSION_REQUEST_CODE)
+            } else {
+                //Permission Granted-System will work
+            }
+        }
 
         val b1: Button = findViewById(R.id.button)
         val e1: EditText = findViewById(R.id.editTextNumber)
@@ -30,25 +40,7 @@ class MainActivity : AppCompatActivity() {
 
             alarmData= alarmData(LocalDateTime.now().plusSeconds(sec.toLong()) )
             alarmData?.let(scheduler::schedule)
-//            var i = Intent(applicationContext, MyBroadCastReciever::class.java)
-//            var pi = PendingIntent.getBroadcast(applicationContext, 111, i, PendingIntent.FLAG_IMMUTABLE)
-//            var am = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-//
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//                am.setExactAndAllowWhileIdle(
-//                    AlarmManager.RTC_WAKEUP,
-//                    System.currentTimeMillis() + (sec * 1000),
-//                    pi
-//                )
-//            }
-//            else {
-//                am.setExact(
-//                    AlarmManager.RTC_WAKEUP,
-//                    System.currentTimeMillis() + (sec * 1000),
-//                    pi
-//                )
-//
-//            }
+
             Toast.makeText(applicationContext, "Alarm set for$sec", Toast.LENGTH_SHORT).show()
 
         }
